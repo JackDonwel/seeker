@@ -147,6 +147,40 @@ def send_telegram(content, msg_type):
 			return
 		from telegram_api import tgram_sender
 		tgram_sender(msg_type, content, tmpsplit)
+# instead of port 80 wich is unsafe what do you think  
+
+import subprocess
+import re
+
+def startCloudflared():
+    try:
+        print("\n[+] Launching Cloudflared tunnel...")
+        process = subprocess.Popen(
+            ['cloudflared', 'tunnel', '--url', 'http://localhost:5000'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True
+        )
+
+        # Read output line-by-line in real-time
+        while True:
+            line = process.stdout.readline()
+            if not line:
+                break
+
+            print(line.strip())  # Optional: Print all cloudflared output
+
+            # Look for public URL
+            if 'trycloudflare.com' in line:
+                url_match = re.search(r'(https://[^\s]+\.trycloudflare\.com)', line)
+                if url_match:
+                    print(f"\n[+] Cloudflared URL: {url_match.group(1)}")
+                    break
+
+    except Exception as e:
+        print(f"[!] Cloudflared Error: {e}")
+
+
 
 
 def template_select(site):
